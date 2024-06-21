@@ -5,7 +5,7 @@ import numpy as np
 from typing import NamedTuple
 import math
 import shutil
-from noise_camera import noise_cam
+# from noise_camera import noise_cam
 
 
 def fov2focal(fov, pixels):

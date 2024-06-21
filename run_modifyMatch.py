@@ -36,7 +36,7 @@ parser.add_argument("--match_mode", default='E', type=str)
 parser.add_argument("--arg_r", default=5, type=int)
 parser.add_argument("--arg_k", default=10, type=int)
 parser.add_argument("--arg_w", default=1, type=int)
-parser.add_argument("--arg_s", default=False, type=bool) # strict mode of Q
+parser.add_argument("--arg_s", default=False, type=bool)  # strict mode of Q
 parser.add_argument("--threads", default=64, type=int)
 parser.add_argument("--gpu_id", default=3, type=int)
 
@@ -80,7 +80,22 @@ if __name__ == "__main__":
 
     exp_name = exp_name_dir[match_mode]
     exp_path = os.path.join(before_source_path, exp_name)
+    if os.path.exists(exp_path):
+        user_input = input(f"Find folder already exists: {exp_name}, delete ? 'yes' or 'no': ").strip().lower()
+        if user_input == 'yes':
+            for filename in os.listdir(exp_path):
+                file_path = os.path.join(exp_path, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)  # 删除文件或符号链接
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)  # 删除子文件夹
+                except Exception as e:
+                    print(f"Failed to delete {file_path}. Reason: {e}")
+        else:
+            raise Exception(f'{exp_path} exist, please check')
 
+    print(f'creating folder: {exp_path}')
     os.makedirs(os.path.join(exp_path, 'distorted/sparse'), exist_ok=True)
     image_path = os.path.join(before_source_path, 'input')
 
