@@ -5,7 +5,7 @@ import subprocess
 from match_script import generate_match_pairs
 from read_coarse_cam.waymo_read_cam import merge_save_waymo
 import datetime
-
+from pairs2graph import generate_weights
 
 def check_ba(dataset_dir, exp_name):
     exp_dir = os.path.join(dataset_dir, exp_name)
@@ -25,7 +25,7 @@ def check_ba(dataset_dir, exp_name):
 parser = ArgumentParser("Colmap converter")
 parser.add_argument("--no_gpu", action='store_true')
 parser.add_argument("--source_path", "-s",
-                    default='datasets/human_scan/scan/2024-06-03_10-53-31',
+                    default='/home/hdd/gaochao/gof_dataset/images_newquwan/cwom_notex',  # cman/cwom/rp_dennis/rp_mei
                     type=str)
 parser.add_argument("--camera", default="OPENCV", type=str)
 parser.add_argument("--colmap_executable", default="", type=str)
@@ -38,7 +38,7 @@ parser.add_argument("--arg_k", default=10, type=int)
 parser.add_argument("--arg_w", default=1, type=int)
 parser.add_argument("--arg_s", default=False, type=bool)  # strict mode of Q
 parser.add_argument("--threads", default=64, type=int)
-parser.add_argument("--gpu_id", default=3, type=int)
+parser.add_argument("--gpu_id", default=2, type=int)
 
 waymo_frame = [0, 50]
 args = parser.parse_args()
@@ -50,6 +50,9 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_id)
     match_mode = args.match_mode
     threads = str(args.threads)
+    strict_mode = 'loose'
+    if args.arg_s is True:
+        strict_mode = 'strict'
     exp_name_dir = {
         'E': 'exhaustive',
         'T': 'vocab_tree',
@@ -57,7 +60,7 @@ if __name__ == "__main__":
         'O_neighborJump': f'O_neighborJump_{args.arg_r}_{args.arg_k}',
         'O_jump': f'O_jump_{args.arg_k}',
         'C': f'concentric_{args.arg_r}_{args.arg_k}_{args.arg_w}',
-        'Q': f'Q_concentric_{args.arg_r}_{args.arg_k}_{args.arg_w}_{args.arg_s}'
+        'Q': f'Q_concentric_{args.arg_r}_{args.arg_k}_{args.arg_w}_{strict_mode}'
     }
     before_source_path = args.source_path
     if args.dataset_type == "waymo":  # save ['camera_FRONT', 'camera_FRONT_LEFT', 'camera_FRONT_RIGHT'] to $s$/input
@@ -196,5 +199,6 @@ if __name__ == "__main__":
 
     print('check ba ing')
     check_ba(dataset_dir=before_source_path, exp_name=exp_name)
-
+    if match_mode in ['Q', 'C', 'O_jump', 'O_neighbor', 'O_neighborJump']:
+        generate_weights(exp_path)
     print("Done.")

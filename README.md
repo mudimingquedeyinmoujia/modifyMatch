@@ -34,12 +34,16 @@ python run_modifyMatch.py -s path/to/your/dataset --match_mode T --threads 64 --
 ```shell
 python run_modifyMatch.py -s path/to/your/dataset --match_mode O_neighborJump --threads 64 --gpu_id 3
 ```
-##### Params of sparse matching
-- `--match_mode`: O_neighborJump, O_neighbor, O_jump
+##### 3.1 Params of sparse matching (no cam pose)
+- `--match_mode`: O_neighborJump
 - `--arg_r`: neighbor number to match (radius), default 5
 - `--arg_k`: jump interval, default 10
 - `--arg_w`: concentric annulus width, default 1
-
+##### 3.2 Params of sparse matching (with cam pose)
+- `--match_mode`: C (just Concentric), Q (Concentric+quadrant filter)
+- `--arg_r`: neighbor number to match (radius), default 5
+- `--arg_k`: jump interval, default 10
+- `--arg_w`: concentric annulus width, default 1
 
 # Special Case
 

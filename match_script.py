@@ -29,14 +29,13 @@ def generate_match_pairs(image_path, match_mode, arg_list, dataset_path, exp_nam
             original_match(image_path, match_mode, arg_list, match_file_path)
         else:
             waymo_match(match_mode, arg_list, dataset_path, match_file_path, waymo_frame)
-    elif dataset_type == 'ready': # no coarse camera can be used
+    elif dataset_type == 'ready':  # no coarse camera can be used
         print(f'Original Match: {match_file_path}')
         original_match(image_path, match_mode, arg_list, match_file_path)
     else:
         raise Exception('not implement dataset_type')
 
     return match_file_path
-
 
 
 def waymo_match(match_mode, arg_list, dataset_path, output_folder, waymo_frame=None):
@@ -75,7 +74,6 @@ def waymo_match(match_mode, arg_list, dataset_path, output_folder, waymo_frame=N
     return output_folder
 
 
-
 def original_match(image_path, match_mode, arg_list, output_file):
     match_fun_dir = {
         'O_neighbor': neighbor_n_pairs,
@@ -109,6 +107,7 @@ def remove_duplication(input_file, output_file):
     with open(output_file, 'w') as file:
         for pair in image_matches_list:
             file.write(' '.join(pair) + '\n')
+
     return input_lines, len(image_matches)
 
 
@@ -137,29 +136,27 @@ def jump_k_pairs(folder_path, n=-1, k=2, output_file='default.txt'):
 def neighbor_jump_nk_pairs(folder_path, n=1, k=2, output_file='default.txt'):
     matching_pairs = []
     matching_pairs_set = set()
+    for root, dirs, files in os.walk(folder_path):
+        files.sort()
+        for i in range(len(files)):
+            for j in range(1, n + 1):
+                if i + j < len(files):
+                    pair = (files[i], files[i + j])
+                    if pair not in matching_pairs_set:
+                        matching_pairs.append(pair)
+                        matching_pairs_set.add(pair)
+            for j in range(i, len(files)):
+                if (j - i) % k == 0 and j != i:
+                    pair = (files[i], files[j])
+                    if pair not in matching_pairs_set:
+                        matching_pairs.append(pair)
+                        matching_pairs_set.add(pair)
 
     with open(output_file, 'w') as f:
-        for root, dirs, files in os.walk(folder_path):
-            files.sort()
-            for i in range(len(files)):
-                for j in range(1, n + 1):
-                    if i + j < len(files):
-                        pair = (files[i], files[i + j])
-                        if pair not in matching_pairs_set:
-                            matching_pairs.append(pair)
-                            matching_pairs_set.add(pair)
-                for j in range(i, len(files)):
-                    if (j - i) % k == 0 and j != i:
-                        pair = (files[i], files[j])
-                        if pair not in matching_pairs_set:
-                            matching_pairs.append(pair)
-                            matching_pairs_set.add(pair)
-
         for pair in matching_pairs:
             f.write(pair[0] + ' ' + pair[1] + '\n')
 
     return output_file
-
 
     # return [cam_1.uid, cam_2.uid, cam_1.camera_id, cam_2.camera_id, cam_1.image_name, cam_2.image_name]
     # return [cam_1.uid, cam_2.uid]
@@ -181,6 +178,7 @@ def quadrant_filter_match(cam_info_list, s=False):
                 match_list.append(get_match_info(cam_i, cam_j))
                 # print([cam_i.uid, cam_j.uid])
     return match_list
+
 
 def get_match_info(cam_1, cam_2):
     return [cam_1.new_name, cam_2.new_name]
